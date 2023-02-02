@@ -25,4 +25,4 @@ CSS Clear
 CSS Links
 CSS Display
 CSS Website Layout
-![image](https://user-images.githubusercontent.com/106338757/216297874-e18adec4-d302-444d-9f0c-8b250b1c48fe.png)
+
