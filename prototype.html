@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Prototype</title>
+</head>
+
+<body>
+    <h2>PROTOTYPE</h2>
+    <p id="demo"></p>
+    <script>
+        function foo(a, b) {
+            return a * b;
+        }
+
+        function people(name, age) {
+            this.name = name;
+            this.age = age;
+            this.showInfo = function () {
+                return "My name: " + this.name + " Age: " + this.age;
+            }
+        }
+
+        var hero = new people("Hung", 18);
+
+        // them prototye o dia chi cu
+        people.prototype.height = 1.7;
+        people.prototype.weight = 69.3;
+        people.prototype.getInfo = function () {
+            return "Height: " + this.height + " Weight: " + this.weight;
+        }
+
+        // them prototype o dia chi moi
+        // people.prototype = {
+        //     height:  1.7,
+        //     weight: 69.2,
+        //     getInfo: function() {
+        //         return "Height: " + height + " Weight: " + weight;
+        //     }
+        // }
+
+        // constructor
+        //document.getElementById("demo").innerHTML = typeof foo.constructor;
+
+        // prototype
+        //document.getElementById("demo").innerHTML = typeof foo.prototype;
+
+        // First info
+        //document.getElementById("demo").innerHTML = "hero.name: " + hero.name + "<br>" + "hero.age: " + hero.age + "<br>" + "hero.showInfo: " + hero.showInfo();
+
+        // Second info
+        // document.getElementById("demo").innerHTML = "hero.name: " + hero.name + "<br>" + "hero.age: " + hero.age +
+        //     "<br>" + "hero.showInfo: " + hero.showInfo() + "<br> hero.weight: " + hero.weight + "<br>" + "hero.height: " +
+        //     hero.height + "<br>" + "hero.getInfo: " + hero.getInfo();
+
+        // Su khac nhau
+        // people.prototype.getInfo = function () {
+        //     return "Height: " + this.height + " Weight: " + this.weight;
+        // }
+
+        // people.prototype.getInfo = function () {
+        //     return "Height: " + hero.prototype.height + " Weight: " + hero.prototype.weight;
+        // }
+
+        // Mot cach khac de lay du lieu
+        // document.getElementById("demo").innerHTML = "hero.constructor === people: " + (hero.constructor === people) +
+        //     "<br> hero.constructor.prototype.height: " + hero.constructor.prototype.height;
+
+        // Lay prototype cua Object() to
+        // document.getElementById("demo").innerHTML = "hero.toString(): " + hero.toString();
+
+        // Overwriting a prototype's property with an own property 
+        function animal(name) {
+            this.name = name;
+        }
+        animal.prototype.name = "Cat";
+        var dog = new animal("Dog");
+        // document.getElementById("demo").innerHTML = "dog.name: " + dog.name;
+
+        // Kiem tra xem co dung property cua chinh no ko
+        // document.getElementById("demo").innerHTML = "dog.hasOwnProperty('name'): " + dog.hasOwnProperty("name");
+
+        // Xoa property name
+        // document.getElementById("demo").innerHTML = "delete dog.name: " + delete dog.name + "<br> dog.name: " + dog
+        //     .name + "<br> dog.hasOwnProperty('name'): " + dog.hasOwnProperty("name");
+
+        // Co the tao lai name property
+        dog.name = "Dog";
+        // document.getElementById("demo").innerHTML = "dog.name = 'Dog' <br> dog.name: " + dog.name; 
+
+        // Method isPrototypeOf()
+        var monkey = {
+            hair: true,
+            feeds: "Bananas",
+            breathes: "Air"
+        }
+
+        function human(name) {
+            this.name = name;
+        }
+
+        human.prototype = monkey;
+
+        var hung = new human("Hung");
+        // document.getElementById("demo").innerHTML = "monkey.isPrototypeOf(hung): " + monkey.isPrototypeOf(hung);
+
+        //document.getElementById("demo").innerHTML = "Object.getPrototypeOf(hung).feeds: " + Object.getPrototypeOf(hung).feeds;
+
+        // __proto__
+
+        function guys() {}
+
+        guys.prototype = monkey;
+
+        var developer = new guys();
+
+        developer.feeds = "Rice";
+        developer.hack = "Javascript";
+
+        // document.getElementById("demo").innerHTML = "developer.hack: " + developer.hack + "<br> developer.feeds: " +
+        //     developer.feeds + "<br>developer.breathes: " + developer.breathes;
+
+        // phan biet __proto__ voi prototype
+        // __proto__ la mot thuoc tinh cua mot doi tuong
+        // prototye la mot thuoc tinh cua mot contructor function duoc su dung de tao cac object
+
+        // document.getElementById("demo").innerHTML = "typeof developer.__proto__: " + typeof developer.__proto__ +
+        //     "<br> typeof developer.prototype: " + typeof developer.prototype +
+        //     "<br>typeof developer.constructor.prototype: " + typeof developer.constructor.prototype;
+
+        // Prototype gotchas: Van de cua prototype
+
+        // The prototype chain is live, except
+        // for when you completely replace the
+        // prototype object
+
+        // The prototype.constructor method is not reliable
+
+        function Dog() {
+            this.tail = true;
+        }
+
+        var benji = new Dog();
+        var rusty = new Dog();
+
+        // Ke ca ngay sau khi tao 2 object tren ta van co the them thuoc tinh vao prototype cua Dog()
+        // va 2 object tren se co the truy cap vao cac thuoc tinh moi
+
+        Dog.prototype.say = function () {
+            return "Woof!";
+        }
+
+        //document.getElementById("demo").innerHTML = "benji.say(): " + benji.say() + "<br> rusty.say(): " + rusty.say();
+
+        // them thuoc tinh vao prototype = cach tao new object
+
+        Dog.prototype = {
+            paws: 4,
+            hair: true
+        };
+
+        //Khi này các object cũ sẽ không thể truy cập được đến property của prototype mới vì các object cũ vẫn giữ liên kết __proto__ tới các prototype cũ
+
+        // document.getElementById("demo").innerHTML = " typeof benji.paws: " + typeof benji.paws + "<br>benji.say(): " +
+        //     benji.say() + "<br>typeof benji.__proto__.say: " + typeof benji.__proto__.say +
+        //     "<br>typeof benji.__proto__.paws: " + typeof benji.__proto__.paws;
+
+        // Từ giờ bất kì object mới nào được tạo ra sẽ sử dụng liên kết __proto__ đến địa chỉ của prototype mới
+
+        var lucy = new Dog();
+        
+        // document.getElementById("demo").innerHTML = "lucy.say(): TypeError: lucy.say is not a function" + "<br>lucy.paws: " + lucy.paws;
+
+        // Secret link __proto__ đã được thay đổi đến địa chỉ prototype mới
+
+        //document.getElementById("demo").innerHTML = "typeof lucy.__proto__.say: " + typeof lucy.__proto__.say + "<br>typeof lucy.__proto__.paws: " + typeof lucy.__proto__.paws;
+    </script>
+</body>
+
+</html>
