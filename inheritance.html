@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>INHERITANCE</title>
+</head>
+
+<body>
+    <h2>INHERITANCE</h2>
+    <p id="demo"></p>
+    <script>
+        // Tất cả các function đều một thuộc tính prototype
+        // Khi 1 function được gọi lại với từ khoá new thì 1 object sẽ đc tạo ra
+        // Object này sẽ có một sceret link tới prototype của constructor function
+        // Secret link(__proto__) cho phép các methods và properties của prototype của constructor
+        // function được sử dụng nếu như chúng thuộc về đối tượng mới được tạo
+
+
+        // Prototype chaining example
+        function shape() {
+            this.name = "shape";
+            this.toString = function () {
+                return this.name;
+            }
+        }
+
+        function twoDShape() {
+            this.name = "2D Shape";
+        }
+
+        function triangle(side, height) {
+            this.name = "Triangle";
+            this.side = side;
+            this.height = height;
+            this.getArea = function () {
+                return this.side * this.height / 2;
+            }
+        }
+
+        // Thay vì phải thêm các properties mới ta hoàn toàn có thể gọi lại chúng ở trong objects khác bằng cách gọi lại constructor shape()
+        // với từ khoá new
+
+        twoDShape.prototype = new shape();
+        triangle.prototype = new twoDShape();
+
+        // Khi này các constructor property lại trỏ không chính xác nữa
+        // Để sửa lại ta dùng:
+
+        twoDShape.prototype.constructor = twoDShape;
+        triangle.prototype.constructor = triangle;
+
+        var my = new triangle(5, 10);
+
+        // Cùng kiểm tra xem my đã trỏ đến đúng constructor của nó chưa
+        // document.getElementById("demo").innerHTML = "my.constructor === triangle:  " + (my.constructor === triangle);
+
+        //Kiểm tra xem my có thuộc class hay kế thừa từ nó hay không
+        document.getElementById("demo").innerHTML = "my instanceof Shape: " + (my instanceof shape) +
+            "<br>my instanceofTwoDShape: " + (my instanceof twoDShape) + "<br>my instanceof Triangle: " + (
+                my instanceof triangle) + "<br>my instanceof Array: " + (my instanceof Array);
+        
+    </script>
+</body>
+
+</html>
