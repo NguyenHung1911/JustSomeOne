@@ -1,65 +1,372 @@
 <!DOCTYPE html>
 <html>
-
-<head>
+  <head>
     <title>INHERITANCE</title>
-</head>
+  </head>
 
-<body>
+  <body>
     <h2>INHERITANCE</h2>
     <p id="demo"></p>
+    <p id="demo1"></p>
     <script>
-        // Tất cả các function đều một thuộc tính prototype
-        // Khi 1 function được gọi lại với từ khoá new thì 1 object sẽ đc tạo ra
-        // Object này sẽ có một sceret link tới prototype của constructor function
-        // Secret link(__proto__) cho phép các methods và properties của prototype của constructor
-        // function được sử dụng nếu như chúng thuộc về đối tượng mới được tạo
+      // Tất cả các function đều một thuộc tính prototype
+      // Khi 1 function được gọi lại với từ khoá new thì 1 object sẽ đc tạo ra
+      // Object này sẽ có một sceret link tới prototype của constructor function
+      // Secret link(__proto__) cho phép các methods và properties của prototype của constructor
+      // function được sử dụng nếu như chúng thuộc về đối tượng mới được tạo
 
+      // Prototype chaining example
+      function shape() {
+        this.name = "shape";
+        this.toString = function () {
+          return this.name;
+        };
+      }
 
-        // Prototype chaining example
-        function shape() {
-            this.name = "shape";
-            this.toString = function () {
-                return this.name;
-            }
+      function twoDShape() {
+        this.name = "2D Shape";
+      }
+
+      function triangle(side, height) {
+        this.name = "Triangle";
+        this.side = side;
+        this.height = height;
+        this.getArea = function () {
+          return (this.side * this.height) / 2;
+        };
+      }
+
+      // Thay vì phải thêm các properties mới ta hoàn toàn có thể gọi lại chúng ở trong objects khác bằng cách gọi lại constructor shape()
+      // với từ khoá new
+
+      twoDShape.prototype = new shape();
+      triangle.prototype = new twoDShape();
+
+      // Khi này các constructor property lại trỏ không chính xác nữa
+      // Để sửa lại ta dùng:
+
+      twoDShape.prototype.constructor = twoDShape;
+      triangle.prototype.constructor = triangle;
+
+      var my = new triangle(5, 10);
+
+      // Cùng kiểm tra xem my đã trỏ đến đúng constructor của nó chưa
+      // document.getElementById("demo").innerHTML = "my.constructor === triangle:  " + (my.constructor === triangle);
+
+      //Kiểm tra xem my có thuộc class hay kế thừa từ nó hay không
+
+      //   document.getElementById("demo").innerHTML =
+      //     "my instanceof Shape: " +
+      //     (my instanceof shape) +
+      //     "<br>my instanceofTwoDShape: " +
+      //     (my instanceof twoDShape) +
+      //     "<br>my instanceof Triangle: " +
+      //     (my instanceof triangle) +
+      //     "<br>my instanceof Array: " +
+      //     (my instanceof Array);
+
+      // Moving shared properties to the prototype
+      // Khi ta tạo ra một object sử dụng constructor function, Những property của chính nó đc thêm vào bằng cách sử dụng this
+      // Nó có thể không hiệu quả đối với các property ko bị thay đổi
+
+      // Xem ví dụ sau đây:
+
+      function Shape() {
+        this.name = "Shape";
+      }
+
+      // Khi này cứ mỗi lần ta tạo ra một object mới sử dụng new Shape()
+      // 1 thuộc tính name mới lại được tạo ra và lưu lại ở đâu đó trong bộ nhớ
+      // Điều này dẫn đến tốn bộ nhớ và tài nguyên hơn
+      // 1 cách khác là đặt thuộc tính name vào trong prototype và shared tới tất cả các instances
+
+      function Shape() {}
+      Shape.prototype.name = "Shape";
+
+      // Bây giờ, mỗi khi ta tạo một object mới sử dụng new Shape(), object đấy sẽ ko có thuộc tính name riêng
+      // nhưng có thể sử dụng cái mà đã đc thêm vào trong prototype
+      // Cái này hiệu quả hơn, nhưng ta chỉ nên dùng cho những property ko bị thay đổi trong bất bì trường hợp gì
+      // Methods là lý tưởng cho kiểu sharing này
+
+      Shape.prototype.toString = function () {
+        return this.name;
+      };
+
+      function TwoDShape() {}
+
+      TwoDShape.prototype = new Shape();
+      TwoDShape.prototype.constructor = TwoDShape;
+
+      TwoDShape.prototype.name = "2D Shape";
+
+      // Chú ý nên kế thừa đầu tiên rồi mới viết đè các thuộc tính prototype
+
+      // Triangle constructor có một chút khác biệt
+      // Vì mỗi object đc tạo ra từ new Triangle() sẽ có cách chiều dài cạch và chiều cao khác nhau
+      // Vì vậy nên giữ side và height là thuộc tính riêng thì tốt hơn
+      // getArea() method sẽ vẫn giữ y nguyên công thức vs bất kì kích thước nào nên có thể cho vào prototype
+
+      function Triangle(side, height) {
+        this.side = side;
+        this.height = height;
+      }
+
+      Triangle.prototype = new TwoDShape();
+      Triangle.prototype.constructor = Triangle;
+
+      Triangle.prototype.name = "Triangle";
+      Triangle.prototype.getArea = function () {
+        return (this.side * this.height) / 2;
+      };
+
+      // Ví dụ thử nghiệm
+      var a = new Triangle(5, 10);
+
+      //   document.getElementById("demo").innerHTML =
+      //     "a.getArea(): " + a.getArea() + "<br>a.toString(): " + a.toString();
+
+      // Có một sự khác biệt nhỏ khi gọi a.toString()
+      // Nó sẽ nhiều hơn 1 lần tìm kiếm để có thể tìm thấy Shape.prototype
+      // Vì nó sẽ tìm kiếm ở các property của Shape xong mới chạy vào Shape.prototype
+
+      // Inheriting the prototype only
+      // Ở phần trc, vì vấn đề hiệu quả, chúng ta đã thêm những property và methods có thể tái sử dụng vào trong prototype
+      // Một ý tưởng khác rằng, chỉ cần kế thừa prototype vì tất cả các code có thể tái sử dụng đều ở đây
+      // Có nghĩa là kế thừa Shape.prototype sẽ tốt hơn kế thừa cả 1 object đc tạo từ new Shape()
+      // Vì khi new Shpae() sẽ chỉ cho bạn những property riêng của Shape, những property ko dùng để tái sử dụng
+      // Và điều đó sẽ có những lợi ích sau:
+      // Ko cần tạo 1 object mới chỉ vì mục đích kế thừa
+      // Có ít tra cứu hơn trong thời gian chạy code
+
+      function Shape() {}
+
+      Shape.prototype.name = "Shape";
+      Shape.prototype.toString = function () {
+        return this.name;
+      };
+
+      function TwoDShape() {}
+
+      TwoDShape.prototype = Shape.prototype;
+      TwoDShape.prototype.constructor = TwoDShape;
+
+      TwoDShape.prototype.name = "2D shape";
+      function Triangle(side, height) {
+        this.side = side;
+        this.height = height;
+      }
+
+      Triangle.prototype = TwoDShape.prototype;
+      Triangle.prototype.constructor = Triangle;
+
+      Triangle.prototype.name = "Triangle";
+      Triangle.prototype.getArea = function () {
+        return (this.side * this.height) / 2;
+      };
+
+      var my = new Triangle(5, 10);
+
+      //document.getElementById("demo").innerHTML = "my.getArea(): " + my.getArea() + "<br>my.toString(): " + my.toString();
+
+      // Trong ví dụ này, prototype cùng trỏ đến đối tượng mà prototype của TwoDShape trỏ vào
+      // và cũng là đối tượng mà Shape.prototype trỏ vào
+      // Nhớ rắng object ko copy theo giá trị mà chỉ theo địa chỉ tham chiếu
+      // Vậy nên prototype của my sẽ trỏ thẳng vào Shape.prototype
+      // Và nó chỉ mất 2 bước để tìm thấy method toString() trái ngược với 4 bước (Như cách trên) và 3 bước (Như cách đầu tiên)
+
+      // Chỉ cần copy mỗi prototype hiệu quả hơn, nhưng nó vẫn có 1 tác dụng phụ
+      // Tất cả các prototypes của con hay cha đều trỏ chung tới 1 object
+      // Nên khi con hay cha thay đổi prototype thì tất cả đều bị ảnh hưởng
+
+      // Hãy xem ví dụ dưới đây
+      //   document.getElementById("demo").innerHTML =
+      //     "Triangle.prototype.name: " + Triangle.prototype.name;
+
+      // Vì chúng ta đã thay đổi prototype.name nên Shape.prototype.name cũng bị thay đổi theo
+
+      var s = new Shape();
+
+      //   document.getElementById("demo1").innerHTML = "s.name: " + s.name;
+
+      // Phương pháp này hiệu quả hơn nhưng có thể sẽ ko phù hợp trong mọi trường hợp
+
+      // A temporary constructor – new F()
+
+      // Khi mà tất cả các prototype trỏ đến chung một object
+      // và cha có những thuộc tính của con, điều nãy đã phá vỡ prototype chain
+      // Giải pháp cho vấn đề trên:
+      // Sủ dụng một temporary constructor function trung gian
+      // Tạo một function rỗng f() và setting prototype của f() = prototype của cha
+      // và tạo ra một object ko có thuộc tính nhưng kế thừa prototype của cha
+
+      // Hãy xem ví dụ sau đây
+      function Shape() {}
+
+      Shape.prototype.name = "Shape";
+
+      Shape.prototype.toString = function () {
+        return this.name;
+      };
+
+      function TwoDShape() {}
+
+      var F = function () {};
+
+      F.prototype = Shape.prototype;
+      TwoDShape.prototype = new F();
+      TwoDShape.prototype.constructor = TwoDShape;
+
+      TwoDShape.prototype.name = "2D shape";
+      function Triangle(side, height) {
+        this.side = side;
+        this.height = height;
+      }
+
+      var F = function () {};
+
+      F.prototype = TwoDShape.prototype;
+      Triangle.prototype = new F();
+      Triangle.prototype.constructor = Triangle;
+
+      Triangle.prototype.name = "Triangle";
+      Triangle.prototype.getArea = function () {
+        return (this.side * this.height) / 2;
+      };
+
+      // Tạo 1 object my triangle để thử nghiệm
+
+      var my = new Triangle(5, 10);
+
+      //   document.getElementById("demo").innerHTML =
+      //     "my.getArea(): " + my.getArea() + "<br>my.toString(): " + my.toString();
+
+      // Ktra xem thuộc tính của cha có bị thay đổi theo con ko
+      var s = new Shape();
+
+      //   document.getElementById("demo").innerHTML =
+      //     "s.name: " +
+      //     s.name +
+      //     "<br>I am a + new TwoDShape(): " +
+      //     "I am a " +
+      //     new TwoDShape();
+
+      //Uber – access to the parent from a child object
+      // Các ngôn ngữ OO cổ điển thường có cú pháp đặt biệt
+      // cho phép bạn truy cập vào lớp cha hay còn gọi là siêu lớp
+      // Điều này thuận tiện cho việc lớp con muốn có một phương thức
+      // có thể thực hiện mọi thứ mà lớp cha có thể làm, cộng một số thứ bổ sung cho nó
+      // Trong trường hợp như vậy, lớp con gọi method của cha mẹ có cùng tên và làm việc với cùng kết quả
+
+      //Trong js ko có cú pháp đặc biệt nhưng thật đơn giản để có thể đạt được chức năng tương tự như vậy
+
+      function Shape() {}
+
+      Shape.prototype.name = "shape";
+      Shape.prototype.toString = function () {
+        var result = [];
+        if (this.constructor.uber) {
+          result[result.length] = this.constructor.uber.toString();
         }
+        result[result.length] = this.name;
+        return result.join(", ");
+      };
 
-        function twoDShape() {
-            this.name = "2D Shape";
+      function TwoDShape() {}
+
+      var F = function () {};
+      F.prototype = Shape.prototype;
+      TwoDShape.prototype = new F();
+      TwoDShape.prototype.constructor = TwoDShape;
+      TwoDShape.uber = Shape.prototype;
+
+      TwoDShape.prototype.name = "2D shape";
+
+      function Triangle(side, height) {
+        this.side = side;
+        this.height = height;
+      }
+
+      var F = function () {};
+      F.prototype = TwoDShape.prototype;
+      Triangle.prototype = new F();
+      Triangle.prototype.constructor = Triangle;
+      Triangle.uber = TwoDShape.prototype;
+
+      Triangle.prototype.name = "Triangle";
+      Triangle.prototype.getArea = function () {
+        return (this.side * this.height) / 2;
+      };
+
+      var my = new Triangle(5, 10);
+
+      document.getElementById("demo").innerHTML =
+        "my.toString(): " + my.toString();
+
+      // Thuộc tính mới uber trỏ vào prototype của lớp cha
+      // Sửa lại toString() method
+
+      // Trước đây, toString chỉ trả về this.name
+      // Giờ đây, nó sẽ ktra xem this.constructor.uber có tồn tại ko
+      // nếu có gọi toString() trước. this.constructor là một function của chính nó
+      // và this.constructor.uber trỏ đến prototype của lớp cha
+      // Kết quả khi ta gọi toString cho trường hợp Triangle
+      // Tất cả methods toString() trong prototype chain được gọi
+
+      // Isolating the inheritance part into a function
+
+      // Ta hãy chuyển các code liên quan đến kế thừa vào một function tái sử dụng extend()
+
+      function extend(Child, Parent) {
+        var F = function () {};
+        F.prototype = Parent.prototype;
+        Child.prototype = new F();
+        Child.prototype.constructor = Child;
+        Child.uber = Parent.prototype;
+      }
+
+      // Sử dụng function này giúp ta giữ code đc clean với những task liên quan đến kế thừa lặp đi lặp lại
+      // Nhờ cách này ta có thể kế thừa chỉ bằng cách sử dụng 2 dòng code
+
+      extend(TwoDShape, Shape);
+      extend(Triangle, TwoDShape);
+
+      function Shape() {}
+
+      Shape.prototype.name = "shape";
+      Shape.prototype.toString = function () {
+        var result = [];
+        if (this.constructor.uber) {
+          result[result.length] = this.constructor.uber.toString();
         }
+        result[result.length] = this.name;
+        return result.join(", ");
+      };
 
-        function triangle(side, height) {
-            this.name = "Triangle";
-            this.side = side;
-            this.height = height;
-            this.getArea = function () {
-                return this.side * this.height / 2;
-            }
-        }
+      function TwoDShape() {}
 
-        // Thay vì phải thêm các properties mới ta hoàn toàn có thể gọi lại chúng ở trong objects khác bằng cách gọi lại constructor shape()
-        // với từ khoá new
+      extend(TwoDShape, Shape);
 
-        twoDShape.prototype = new shape();
-        triangle.prototype = new twoDShape();
+      TwoDShape.prototype.name = "2D shape";
 
-        // Khi này các constructor property lại trỏ không chính xác nữa
-        // Để sửa lại ta dùng:
+      function Triangle(side, height) {
+        this.side = side;
+        this.height = height;
+      }
 
-        twoDShape.prototype.constructor = twoDShape;
-        triangle.prototype.constructor = triangle;
+      extend(Triangle, TwoDShape);
 
-        var my = new triangle(5, 10);
+      Triangle.prototype.name = "Triangle";
 
-        // Cùng kiểm tra xem my đã trỏ đến đúng constructor của nó chưa
-        // document.getElementById("demo").innerHTML = "my.constructor === triangle:  " + (my.constructor === triangle);
+      Triangle.prototype.getArea = function () {
+        return (this.side * this.height) / 2;
+      };
 
-        //Kiểm tra xem my có thuộc class hay kế thừa từ nó hay không
-        document.getElementById("demo").innerHTML = "my instanceof Shape: " + (my instanceof shape) +
-            "<br>my instanceofTwoDShape: " + (my instanceof twoDShape) + "<br>my instanceof Triangle: " + (
-                my instanceof triangle) + "<br>my instanceof Array: " + (my instanceof Array);
-        
+      //Hãy cùng xem kết quả
+
+      document.getElementById("demo").innerHTML = "new Triangle().toString(): " + new Triangle().toString();
+
+      // Copying properties
+      // 
     </script>
-</body>
-
+  </body>
 </html>
